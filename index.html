@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Arma tus psyco mwichys y aparta tu cupo del drop por WhatsApp.">
+<link rel="icon" href="img/isotipo.svg">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Arma tus mwichys</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: una sola columna tipo app; cada paso se desbloquea al elegir el anterior, con resumen fijo abajo */
+:root{
+  --bg:#F1E2D2; --paper:#FBF5EE; --cocoa:#5B3A2E; --ink:#2B1C16; --soft:#7A5C4E;
+  --rosa:#EC9AB0; --rosa-ink:#8E3550; --line:#E2CDB8; --ok:#3F7A4C; --err:#C62828;
+  --display:"Fredoka",ui-rounded,"Trebuchet MS",sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#21160F; --paper:#2E2018; --cocoa:#E8CDB4; --ink:#F7EDE3; --soft:#C7AE9C;
+  --rosa:#EC9AB0; --rosa-ink:#F6B9CA; --line:#4A3529; --ok:#8CCB98; --err:#FF8A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#21160F; --paper:#2E2018; --cocoa:#E8CDB4; --ink:#F7EDE3; --soft:#C7AE9C;
+  --rosa:#EC9AB0; --rosa-ink:#F6B9CA; --line:#4A3529; --ok:#8CCB98; --err:#FF8A80; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 140px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{background:#5B3A2E;color:#F1E2D2;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:22px max(16px,env(safe-area-inset-left,0px)) 20px;text-align:center}
+.brand{font-family:var(--display);font-weight:600;font-size:44px;line-height:1;letter-spacing:.5px}
+.brand-sub{font-size:14px;opacity:.9;margin-top:6px}
+.drop{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.chip{background:rgba(241,226,210,.14);border:1px solid rgba(241,226,210,.35);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
+.chip b{color:#EC9AB0}
+h2{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15;margin:0;color:var(--cocoa);text-wrap:balance}
+.step{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;transition:opacity .25s}
+.step.locked{opacity:.45;pointer-events:none}
+.step-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+.price{font-family:var(--display);font-weight:600;color:var(--rosa-ink);font-size:20px}
+p{margin:0;color:var(--soft)}
+.colors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sw{appearance:none;border:2px solid var(--line);background:var(--bg);border-radius:18px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font:inherit;color:var(--ink);font-weight:700;font-size:14px;min-height:44px}
+.sw:focus-visible,.yn button:focus-visible,.cta:focus-visible{outline:3px solid var(--rosa);outline-offset:2px}
+.sw[aria-pressed="true"]{border-color:var(--rosa);box-shadow:0 0 0 3px color-mix(in srgb,var(--rosa) 35%,transparent)}
+.fur{width:72px;height:72px;border-radius:50%;object-fit:cover;display:block;background:var(--bg)}
+.photo{width:100%;max-width:100%;border-radius:16px;display:block;background:#FBF5EE;object-fit:contain}
+.photo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photo-row figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.photo-row figcaption{font-size:13px;font-weight:700;color:var(--soft);text-align:center}
+.logo{height:64px;width:auto;display:block;margin:0 auto}
+.pick{position:relative;border-radius:16px;overflow:hidden;background:#FBF5EE}
+.pick .photo{border-radius:0}
+.hits{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr)}
+.hit{appearance:none;border:0;margin:0;background:transparent;cursor:pointer;position:relative;display:flex;align-items:flex-end;justify-content:center;padding:0 4px 10px;font:inherit;transition:background .2s}
+.hit span{background:rgba(251,245,238,.92);color:#5B3A2E;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;border:2px solid transparent}
+.hit:hover{background:rgba(236,154,176,.12)}
+.hit:focus-visible{outline:3px solid var(--rosa);outline-offset:-3px}
+.hits.chosen .hit[aria-pressed="false"]{background:rgba(43,28,22,.38)}
+.hit[aria-pressed="true"]{box-shadow:inset 0 0 0 4px #EC9AB0}
+.hit[aria-pressed="true"] span{background:#EC9AB0;color:#2B1C16}
+.follow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-top:14px}
+.follow-t{width:100%;font-size:13px;font-weight:700;opacity:.9}
+.follow a{display:inline-flex;align-items:center;gap:6px;background:#F1E2D2;color:#5B3A2E;text-decoration:none;border-radius:999px;padding:8px 14px;min-height:40px;font-weight:800;font-size:14px}
+.follow a:hover{background:#EC9AB0}
+.follow a:focus-visible{outline:3px solid #EC9AB0;outline-offset:2px}
+.follow svg{width:18px;height:18px;flex:none}
+.social a{color:#F1E2D2;text-decoration:none;border:1.5px solid rgba(241,226,210,.5);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800}
+.rib{height:14px;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));background:repeating-linear-gradient(90deg,#5B3A2E 0 7px,#6E4A3C 7px 14px)}
+.hero{display:flex;align-items:center;gap:16px;padding-block:6px}
+.hero img{width:96px;height:auto;flex:none}
+.hero h1{font-family:var(--display);font-weight:600;font-size:30px;line-height:1.1;margin:0;color:var(--cocoa);text-wrap:balance}
+.hero p{margin:4px 0 0}
+.step-head .tag{display:inline-flex;align-items:center;gap:8px}
+.step-head .tag::before{content:"";width:28px;height:28px;flex:none;background:#F1E2D2 url(img/isotipo.svg) center/22px no-repeat;border-radius:50%}
+.pack{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.pack img{width:100%;max-width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px;display:block}
+.pack figcaption{font-size:13px;font-weight:700;color:var(--soft)}
+.band{background:#5B3A2E;color:#F1E2D2;margin:8px calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:24px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.band .wm{height:44px;width:auto}
+.band .pf{width:64px;height:64px;border-radius:50%}
+.band p{color:#F1E2D2;font-size:14px;max-width:44ch}
+.band .about{font-size:15px;line-height:1.55}
+.facts{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700}
+.facts span{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.facts svg{width:18px;height:18px;flex:none}
+.social{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.social span{border:1.5px solid rgba(241,226,210,.5);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800}
+.copyr{font-size:12px!important;opacity:.75;border-top:1px solid rgba(241,226,210,.2);padding-top:12px;width:100%;max-width:none!important}
+.soon{position:relative;overflow:hidden;background:#2B1C16;color:#F1E2D2;border-radius:22px;padding:26px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.soon .eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#EC9AB0}
+.soon h2{color:#F1E2D2;font-size:28px}
+.soon p{color:#E8D7C6;max-width:34ch}
+.mystery{display:flex;gap:14px;justify-content:center;padding:6px 0}
+.mystery i{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--display);font-weight:600;font-size:26px;color:#F1E2D2;background:conic-gradient(from 0deg,#5B3A2E,#EC9AB0,#C49A6C,#F1E2D2,#5B3A2E);filter:saturate(.8);position:relative}
+.mystery i::before{content:"";position:absolute;inset:0;border-radius:50%;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(43,28,22,.45)}
+.mystery i b{position:relative}
+@media (prefers-reduced-motion:no-preference){.mystery i{animation:spin 9s linear infinite}.mystery i b{animation:spin 9s linear infinite reverse}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.free{display:flex;align-items:center;justify-content:center;gap:10px;background:#EC9AB0;color:#2B1C16;border-radius:14px;padding:10px 14px;font-family:var(--display);font-weight:600;font-size:19px;line-height:1.2;text-align:center}
+.free svg{flex:none;width:24px;height:24px}
+.req{color:var(--rosa-ink)}
+.need{font-size:12px;font-weight:700;color:var(--err);line-height:1.3}
+.need:empty{display:none}
+input.miss,select.miss{border-color:var(--err)}
+.hint{font-size:13px;font-weight:700;color:var(--rosa-ink);text-align:center}
+.f-blanco{background:radial-gradient(circle at 35% 30%,#fff 0 30%,#EFE6DA 70%)}
+.f-negro{background:radial-gradient(circle at 35% 30%,#4a4a4a 0 20%,#141210 75%)}
+.f-manchas{background:radial-gradient(circle at 30% 35%,#2b1c16 0 11%,transparent 12%),radial-gradient(circle at 68% 62%,#3a2519 0 13%,transparent 14%),radial-gradient(circle at 62% 25%,#5b3a2e 0 8%,transparent 9%),#C49A6C}
+.f-cafe{background:radial-gradient(circle at 35% 30%,#9a6b4f 0 25%,#6B4532 75%)}
+.knit{border-radius:14px;width:58px;height:58px;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.14) 0 3px,transparent 3px 9px)}
+.k-blanco{background-color:#F4EEE6}.k-negro{background-color:#1d1a18}.k-cafe{background-color:#7A5240}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yn button{appearance:none;font:inherit;font-weight:800;font-size:15px;min-height:48px;border-radius:999px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:8px 12px}
+.yn button[aria-pressed="true"].si{background:var(--rosa);border-color:var(--rosa);color:#2B1C16}
+.yn button[aria-pressed="true"].no{border-color:var(--cocoa);color:var(--cocoa)}
+.gift{display:flex;gap:12px;align-items:center;background:color-mix(in srgb,var(--rosa) 16%,var(--paper));border:1px dashed var(--rosa);border-radius:16px;padding:12px 14px;font-size:14px;color:var(--ink)}
+.star{flex:none;width:34px;height:34px}
+.perks{display:flex;flex-wrap:wrap;gap:6px}
+.perk{font-size:12.5px;font-weight:800;color:var(--ok);border:1px solid currentColor;border-radius:999px;padding:2px 10px}
+.sub[hidden]{display:none}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:14px}
+input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);min-height:48px}
+.summary{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-shadow:0 -8px 24px rgba(43,28,22,.12);z-index:5}
+.sum-in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.sum-txt{flex:1;min-width:0}
+.sum-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-price{font-family:var(--display);font-weight:600;font-size:26px;color:var(--cocoa);line-height:1.1;font-variant-numeric:tabular-nums}
+.sum-ship{font-size:12.5px;color:var(--soft)}
+.cta{appearance:none;border:0;font:inherit;font-weight:800;background:#25A35A;color:#fff;border-radius:999px;padding:12px 18px;min-height:48px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.cta[aria-disabled="true"]{background:var(--line);color:var(--soft)}
+.msg{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;white-space:pre-wrap;color:var(--ink)}
+.copy{appearance:none;font:inherit;font-weight:700;border:2px solid var(--cocoa);color:var(--cocoa);background:transparent;border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer;align-self:flex-start}
+.foot{text-align:center;font-size:13px;color:var(--soft)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" src="img/logo-banda-cocoa.svg" alt="mwichys">
+    <div class="brand-sub">Peluditas, frescas y muy tuyas</div>
+    <div class="brand-sub" style="margin-top:4px"><b style="color:#EC9AB0">Inspiradas en el estilo Y2K</b></div>
+    <div class="drop">
+      <span class="chip">Drop 01 · abre <b>[fecha]</b></span>
+      <span class="chip">Entrega <b>[fecha]</b></span>
+      <span class="chip">Solo <b>25 cupos</b></span>
+    </div>
+    <div class="follow">
+      <span class="follow-t">Síguenos para no perderte ningún drop</span>
+      <a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram @mwichys</a>
+      <a href="https://www.tiktok.com/@mwichys" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.8 2.4 4.6 5 5"/></svg>TikTok @mwichys</a>
+    </div>
+  </header>
+  <div class="rib" aria-hidden="true"></div>
+
+  <div class="hero">
+    <img src="img/isologo.svg" alt="">
+    <div>
+      <h1>Arma tus mwichys en tres toques</h1>
+      <p>Elige tu color, suma lo que quieras y aparta tu cupo por WhatsApp.</p>
+    </div>
+  </div>
+
+  <section class="step" id="s1" aria-labelledby="h1">
+    <div class="step-head"><span class="tag">Paso 1 · la principal</span><span class="price">$23</span></div>
+    <h2 id="h1">Elige tus psyco mwichys</h2>
+    <p>Peluditos, con doble elástico y forro suave, para darle a tu outfit un toque que nadie más tiene.</p>
+    <div class="pick">
+      <img class="photo" src="img/mwichys-colores.jpg" alt="psyco mwichys puestos en blanco, manchas y negro">
+      <div class="hits" role="group" aria-label="color de mwichys">
+        <button class="hit" data-g="mw" data-v="blanco" aria-pressed="false"><span>Blanco</span></button>
+        <button class="hit" data-g="mw" data-v="manchas" aria-pressed="false"><span>Manchas</span></button>
+        <button class="hit" data-g="mw" data-v="negro" aria-pressed="false"><span>Negro</span></button>
+      </div>
+    </div>
+    <p class="hint">Toca el color que quieres</p>
+  </section>
+
+  <section class="step locked" id="s2" aria-labelledby="h2t">
+    <div class="step-head"><span class="tag">Paso 2 · más estilo</span><span class="price">+$3</span></div>
+    <h2 id="h2t">¿Le sumas medias polainas?</h2>
+    <img class="photo" src="img/mwichys-con-polainas.jpg" alt="psyco mwichys con medias polainas puestas">
+    <p>Asoman debajo de tus mwichys y arman el look completo. Combinan con faldas, shorts o jeans.</p>
+    <div class="yn" role="group" aria-label="agregar polainas">
+      <button class="si" data-g="pol" data-v="si" aria-pressed="false">Sí, las quiero</button>
+      <button class="no" data-g="pol" data-v="no" aria-pressed="false">Solo mwichys</button>
+    </div>
+    <div class="sub" id="polColors" hidden>
+      <div class="pick">
+        <img class="photo" src="img/polainas-colores.jpg" alt="medias polainas en blanco, café y negro">
+        <div class="hits" role="group" aria-label="color de polainas">
+          <button class="hit" data-g="pc" data-v="blanco" aria-pressed="false"><span>Blanco</span></button>
+          <button class="hit" data-g="pc" data-v="café" aria-pressed="false"><span>Café</span></button>
+          <button class="hit" data-g="pc" data-v="negro" aria-pressed="false"><span>Negro</span></button>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:8px">Toca el color de tus polainas</p>
+    </div>
+  </section>
+
+  <section class="step locked" id="s3" aria-labelledby="h3">
+    <div class="free"><svg viewBox="0 0 24 24" fill="none" stroke="#2B1C16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Con envío gratis a todo Ecuador</div>
+    <div class="step-head"><span class="tag">Paso 3 · el kit completo</span><span class="price">+$6</span></div>
+    <h2 id="h3">¿Completas con muñequeras?</h2>
+    <img class="photo" src="img/kit-completo.jpg" alt="kit completo puesto: muñequeras, psyco mwichys con estrellitas y medias polainas">
+    <p>Muñequeras peluditas de 9 cm a juego con tus mwichys, con elástico para que no se resbalen.</p>
+    <div class="photo-row">
+      <figure><img class="photo" src="img/munequeras.jpg" alt="muñequeras en blanco, manchas y negro"><figcaption>Muñequeras · 9 cm</figcaption></figure>
+      <figure><img class="photo" src="img/estrellitas.jpg" alt="mwichys con una estrellita en cada pierna"><figcaption>Estrellitas de regalo</figcaption></figure>
+    </div>
+    <div class="gift">
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#EC9AB0" stroke="#5B3A2E" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span><b>De regalo:</b> estrellitas con clip, hechas a mano, para ponerlas donde quieras.</span>
+    </div>
+    <div class="perks"><span class="perk">Ahorras armándolo completo</span></div>
+    <div class="yn" role="group" aria-label="agregar muñequeras">
+      <button class="si" data-g="mu" data-v="si" aria-pressed="false">Sí, kit completo</button>
+      <button class="no" data-g="mu" data-v="no" aria-pressed="false">Así está bien</button>
+    </div>
+  </section>
+
+  <section class="step locked" id="s4" aria-labelledby="h4">
+    <div class="step-head"><span class="tag">Paso 4 · tus datos</span></div>
+    <h2 id="h4">¿A dónde te las enviamos?</h2>
+    <div class="field"><label for="nombre">Tu nombre <span class="req">*</span></label><input id="nombre" autocomplete="name" placeholder="Ej. Valentina"></div>
+    <div class="field"><label for="prov">Provincia <span class="req">*</span></label>
+      <select id="prov"><option value="">Elige tu provincia</option></select>
+    </div>
+    <div class="field"><label for="canton">Cantón <span class="req">*</span></label>
+      <select id="canton" disabled><option value="">Primero elige la provincia</option></select>
+    </div>
+    <div class="field"><label for="calle1">Calle principal y número <span class="req">*</span></label><input id="calle1" autocomplete="address-line1" placeholder="Ej. Av. Amazonas N24-56"></div>
+    <div class="field"><label for="calle2">Calle secundaria <span class="req">*</span></label><input id="calle2" autocomplete="address-line2" placeholder="Ej. y Av. Colón"></div>
+    <div class="field"><label for="ref">Referencia <span class="req">*</span></label><input id="ref" placeholder="Ej. edificio blanco, junto a la farmacia"></div>
+    <div class="field"><label for="maps">Link de tu ubicación en Google Maps <span class="req">*</span></label><input id="maps" inputmode="url" placeholder="Pega aquí el link que te da Compartir en Google Maps"><span class="hint" style="text-align:left;color:var(--soft)">En Google Maps toca tu ubicación, luego Compartir y Copiar enlace.</span></div>
+    <div class="field"><span class="tag">Tu pedido por WhatsApp</span><div class="msg" id="msg"></div></div>
+    <button class="copy" id="copy" type="button">Copiar mensaje</button>
+  </section>
+
+  <section class="soon" aria-labelledby="h6">
+    <span class="eyebrow">Próximamente · drop 02</span>
+    <h2 id="h6">Algo nuevo se está preparando</h2>
+    <div class="mystery" aria-hidden="true"><i><b>?</b></i><i><b>?</b></i><i><b>?</b></i></div>
+    <p>Nuevos colores vienen en camino. ¿Adivinas cuáles? Síguenos para enterarte primero.</p>
+  </section>
+
+  <footer class="band" aria-labelledby="h7">
+    <img class="pf" src="img/perfil.png" alt="">
+    <img class="wm" src="img/logotipo-latte.svg" alt="mwichys">
+    <h2 id="h7" style="color:#F1E2D2;font-size:22px">Quiénes somos</h2>
+    <p class="about">Somos mwichys, una tienda online de accesorios peluditos nacida en el norte de Quito. Nos inspiramos en el estilo Y2K para crear piezas frescas y únicas que combinan con tu look.</p>
+    <div class="facts">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Norte de Quito, sector Andalucía · Ecuador</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Envíos a todo el país por Tramaco o Servientrega</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10h-13zM8 9V7a4 4 0 0 1 8 0v2"/></svg>Tienda online · pedidos por WhatsApp [tu número]</span>
+    </div>
+    <div class="social" aria-label="redes sociales"><a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener">Instagram @mwichys</a><a href="https://www.tiktok.com/@mwichys" target="_blank" rel="noopener">TikTok @mwichys</a></div>
+    <p class="copyr">© 2026 mwichys · Todos los derechos reservados</p>
+  </footer>
+</div>
+
+<div class="summary" role="region" aria-label="resumen del pedido">
+  <div class="sum-in">
+    <div class="sum-txt">
+      <div class="sum-name" id="sumName">Elige el color de tus mwichys</div>
+      <div class="sum-price" id="sumPrice">$23</div>
+      <div class="sum-ship" id="sumShip">+ envío</div>
+      <div class="need" id="need" aria-live="polite"></div>
+    </div>
+    <a class="cta" id="cta" href="#" target="_blank" rel="noopener" aria-disabled="true">Pedir por WhatsApp</a>
+  </div>
+</div>
+
+<script>
+const WA = "593000000000"; // [tu número de WhatsApp con 593, sin el 0 inicial]
+const st = {mw:null, pol:null, pc:null, mu:null};
+let tried=false;
+const ORDER = "MW01-" + Date.now().toString(36).slice(-4).toUpperCase() + Math.floor(Math.random()*36).toString(36).toUpperCase();
+const $ = id => document.getElementById(id);
+
+document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click",()=>{
+  const g=b.dataset.g; st[g]=b.dataset.v;
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));
+  const hs=b.closest(".hits"); if(hs) hs.classList.add("chosen");
+  if(g==="pol" && st.pol==="no"){st.pc=null;st.mu=null;clear("pc");clear("mu");}
+  render();
+}));
+function clear(g){document.querySelectorAll(`[data-g="${g}"]`).forEach(x=>{x.setAttribute("aria-pressed","false");const h=x.closest(".hits");if(h)h.classList.remove("chosen");});}
+const EC={
+"Azuay":["Cuenca","Camilo Ponce Enríquez","Chordeleg","El Pan","Girón","Guachapala","Gualaceo","Nabón","Oña","Paute","Pucará","San Fernando","Santa Isabel","Sevilla de Oro","Sigsig"],
+"Bolívar":["Guaranda","Caluma","Chillanes","Chimbo","Echeandía","Las Naves","San Miguel"],
+"Cañar":["Azogues","Biblián","Cañar","Déleg","El Tambo","La Troncal","Suscal"],
+"Carchi":["Tulcán","Bolívar","Espejo","Mira","Montúfar","San Pedro de Huaca"],
+"Chimborazo":["Riobamba","Alausí","Chambo","Chunchi","Colta","Cumandá","Guamote","Guano","Pallatanga","Penipe"],
+"Cotopaxi":["Latacunga","La Maná","Pangua","Pujilí","Salcedo","Saquisilí","Sigchos"],
+"El Oro":["Machala","Arenillas","Atahualpa","Balsas","Chilla","El Guabo","Huaquillas","Las Lajas","Marcabelí","Pasaje","Piñas","Portovelo","Santa Rosa","Zaruma"],
+"Esmeraldas":["Esmeraldas","Atacames","Eloy Alfaro","Muisne","Quinindé","Rioverde","San Lorenzo"],
+"Galápagos":["San Cristóbal","Isabela","Santa Cruz"],
+"Guayas":["Guayaquil","Alfredo Baquerizo Moreno","Balao","Balzar","Colimes","Coronel Marcelino Maridueña","Daule","Durán","El Empalme","El Triunfo","General Antonio Elizalde","Isidro Ayora","Lomas de Sargentillo","Milagro","Naranjal","Naranjito","Nobol","Palestina","Pedro Carbo","Playas","Salitre","Samborondón","San Jacinto de Yaguachi","Santa Lucía","Simón Bolívar"],
+"Imbabura":["Ibarra","Antonio Ante","Cotacachi","Otavalo","Pimampiro","San Miguel de Urcuquí"],
+"Loja":["Loja","Calvas","Catamayo","Celica","Chaguarpamba","Espíndola","Gonzanamá","Macará","Olmedo","Paltas","Pindal","Puyango","Quilanga","Saraguro","Sozoranga","Zapotillo"],
+"Los Ríos":["Babahoyo","Baba","Buena Fe","Mocache","Montalvo","Palenque","Puebloviejo","Quevedo","Quinsaloma","Urdaneta","Valencia","Ventanas","Vínces"],
+"Manabí":["Portoviejo","24 de Mayo","Bolívar","Chone","El Carmen","Flavio Alfaro","Jama","Jaramijó","Jipijapa","Junín","Manta","Montecristi","Olmedo","Paján","Pedernales","Pichincha","Puerto López","Rocafuerte","San Vicente","Santa Ana","Sucre","Tosagua"],
+"Morona Santiago":["Morona","Gualaquiza","Huamboya","Limón Indanza","Logroño","Pablo Sexto","Palora","San Juan Bosco","Santiago","Sucúa","Taisha","Tiwintza"],
+"Napo":["Tena","Archidona","Carlos Julio Arosemena Tola","El Chaco","Quijos"],
+"Orellana":["Francisco de Orellana","Aguarico","La Joya de los Sachas","Loreto"],
+"Pastaza":["Pastaza","Arajuno","Mera","Santa Clara"],
+"Pichincha":["Quito","Cayambe","Mejía","Pedro Moncayo","Pedro Vicente Maldonado","Puerto Quito","Rumiñahui","San Miguel de los Bancos"],
+"Santa Elena":["Santa Elena","La Libertad","Salinas"],
+"Santo Domingo de los Tsáchilas":["Santo Domingo","La Concordia"],
+"Sucumbíos":["Lago Agrio","Cascales","Cuyabeno","Gonzalo Pizarro","Putumayo","Shushufindi","Sucumbíos"],
+"Tungurahua":["Ambato","Baños de Agua Santa","Cevallos","Mocha","Patate","Quero","San Pedro de Pelileo","Santiago de Píllaro","Tisaleo"],
+"Zamora Chinchipe":["Zamora","Centinela del Cóndor","Chinchipe","El Pangui","Nangaritza","Palanda","Paquisha","Yacuambi","Yantzaza"]
+};
+for(const p of Object.keys(EC)){const o=document.createElement("option");o.value=o.textContent=p;$("prov").appendChild(o);}
+$("prov").addEventListener("change",()=>{
+  const c=$("canton"),p=$("prov").value; c.innerHTML="";
+  const first=document.createElement("option");first.value="";first.textContent=p?"Elige tu cantón":"Primero elige la provincia";c.appendChild(first);
+  (EC[p]||[]).forEach(n=>{const o=document.createElement("option");o.value=o.textContent=n;c.appendChild(o);});
+  c.disabled=!p; render();
+});
+["nombre","canton","calle1","calle2","ref","maps"].forEach(id=>$(id).addEventListener("input",render));
+$("canton").addEventListener("change",render);
+
+function lock(id,on){$(id).classList.toggle("locked",!on);}
+function render(){
+  $("polColors").hidden = st.pol!=="si";
+  lock("s2", !!st.mw);
+  lock("s3", st.pol==="si" && !!st.pc);
+  const ready = st.mw && (st.pol==="no" || (st.pc && st.mu));
+  lock("s4", !!ready);
+
+  const kit = st.pol==="si" && st.mu==="si";
+  const pol = st.pol==="si" && st.pc;
+  let name="Psyco mwichys", price=23;
+  if(pol){name="Psyco mwichys + polainas"; price=26;}
+  if(kit){name="Kit completo"; price=32;}
+
+  const prov=$("prov").value, cant=$("canton").value;
+  const ciudad = cant==="Quito" ? "Quito" : (cant ? "otra" : "");
+  let envio=0, ship="+ Envío: $3 en Quito · $5,50 resto del país";
+  if(kit){ ship="Envío gratis a todo Ecuador"; }
+  else if(ciudad==="Quito"){ envio=3; ship="Incluye $3 de envío en Quito"; }
+  else if(ciudad==="otra"){ envio=5.5; ship="Incluye $5,50 de envío a "+prov; }
+  const total = price+envio;
+  const money = n => "$"+(Number.isInteger(n)?n:n.toFixed(2).replace(".",","));
+
+  $("sumName").textContent = st.mw ? `${name} · ${st.mw}` : "Elige el color de tus mwichys";
+  $("sumPrice").textContent = money(total);
+  $("sumShip").textContent = ship;
+
+  const lugar = cant ? `${cant}, ${prov}` : "";
+  const dir = [$("calle1").value, $("calle2").value].filter(Boolean).join(" ");
+  const lines=[`¡Hola mwichys! Quiero apartar mi cupo del drop 01`, `Pedido n.º ${ORDER}`, ``, `• ${name}`, `• Mwichys: ${st.mw||"-"}`];
+  if(pol) lines.push(`• Polainas: ${st.pc}`);
+  if(kit) lines.push(`• Muñequeras a juego + estrellitas de regalo`);
+  lines.push(``, `Producto: ${money(price)}`, `Envío: ${kit?"gratis":(cant?money(envio):"según mi cantón")}`, `Total a pagar: ${money(total)}`, ``);
+  if($("nombre").value) lines.push(`Nombre: ${$("nombre").value}`);
+  if(lugar) lines.push(`Cantón: ${lugar}`);
+  if(dir) lines.push(`Dirección: ${dir}`);
+  if($("ref").value) lines.push(`Referencia: ${$("ref").value}`);
+  if($("maps").value) lines.push(`Ubicación: ${$("maps").value}`);
+  const text=lines.join("\n");
+  $("msg").textContent=text;
+
+  const req={nombre:"tu nombre",prov:"provincia",canton:"cantón",calle1:"calle principal",calle2:"calle secundaria",ref:"referencia",maps:"link de ubicación"};
+  const faltan=Object.keys(req).filter(id=>!$(id).value.trim());
+  Object.keys(req).forEach(id=>$(id).classList.toggle("miss",tried&&!!ready&&faltan.includes(id)));
+  window.__faltan=faltan; window.__ready=!!ready;
+  $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? "Todos los campos deben ser rellenados" : ""));
+  const cta=$("cta");
+  if(ready && !faltan.length){cta.removeAttribute("aria-disabled");cta.href=`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;}
+  else{cta.setAttribute("aria-disabled","true");cta.href="#";}
+}
+$("cta").addEventListener("click",e=>{
+  if($("cta").getAttribute("aria-disabled")!=="true") return;
+  e.preventDefault(); tried=true; render();
+  if(window.__ready && window.__faltan.length){const f=$(window.__faltan[0]); f.scrollIntoView({behavior:"smooth",block:"center"}); f.focus({preventScroll:true});}
+  else { const l=document.querySelector(".step:not(.locked) ~ .step.locked")||$("s1"); const prev=l.previousElementSibling; (prev&&prev.classList.contains("step")?prev:$("s1")).scrollIntoView({behavior:"smooth",block:"center"}); }
+});
+$("copy").addEventListener("click",()=>{
+  const t=$("msg").textContent;
+  navigator.clipboard.writeText(t).then(()=>{$("copy").textContent="Mensaje copiado";},()=>{
+    const r=document.createRange();r.selectNodeContents($("msg"));const s=getSelection();s.removeAllRanges();s.addRange(r);
+    $("copy").textContent="Selecciónalo y cópialo";});
+});
+render();
+</script>
+
+</body>
+</html>
