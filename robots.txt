@@ -1,0 +1,5 @@
+# mwichys.com: abierto a buscadores y a asistentes de IA
+User-agent: *
+Allow: /
+
+Sitemap: https://mwichys.com/sitemap.xml
