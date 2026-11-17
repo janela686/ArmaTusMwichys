@@ -41,8 +41,10 @@ La página calcula sola el % disponible: `(cupos - vendidos) / cupos`. Con 25 cu
 Es una hoja de Google Sheets de la dueña. **Su link está en las instrucciones de tu proyecto en Cowork, no en este repo** (el repo es público). Pestañas:
 
 - **Resumen**: tablero. La fila 11 tiene el drop actual: `B11` drop, `C11` cupos, `D11` vendidos, `E11` % disponible, `F11` estado (`ABIERTO` / `LLENO`).
-- **Ventas**: la llena el Agente de ventas. Una fila por pedido. Las columnas rosadas (Precio unidad, Envío, Total cobrado, ¿Cuenta como venta?) se calculan solas.
-- **Gastos**: gastos del negocio (la llena la dueña u otro agente).
+- **Ventas**: la llena el Agente de finanzas (cuando el Agente de ventas le avisa que cerró una venta). Una fila por pedido. Las columnas rosadas (Precio unidad, Envío, Total cobrado, ¿Cuenta como venta?) se calculan solas.
+- **Gastos**: gastos del negocio (la llena el Agente de finanzas o la dueña).
+
+Cadena de avisos: **Agente de ventas → Agente de finanzas → tú (Agente web)**. A ti te llegan avisos tipo `Venta registrada` o `Cambio de estado` del Agente de finanzas.
 - **Avisos**: el canal entre agentes. Columnas: Fecha y hora · De · Para · Tipo de aviso · Mensaje · Estado (`Pendiente` / `Hecho`) · Respuesta.
 - **Config**: precios, costos de envío, drop actual (`E3`) y cupos por drop (desde la fila 14).
 
@@ -61,7 +63,7 @@ Tú **solo lees** Ventas, Gastos y Resumen. **Solo escribes** en la pestaña Avi
 5. Marca como `Hecho` los avisos que atendiste y escribe en Respuesta, por ejemplo: `Publicado: 8/25 vendidos · 68% disponible`.
 6. Si `F11 = LLENO` y la página aún no está en agotado:
    - Si no existe ya, agrega en Avisos: De `Agente web` · Para `Dueña` · Tipo `Confirmar agotado` · Mensaje `El drop 01 llegó a 25/25. ¿Pongo la versión agotado? Responde "sí" en Respuesta y marca Hecho.` · Estado `Pendiente`.
-   - Cuando esa fila esté en `Hecho` con "sí" en Respuesta (o la dueña te lo diga directo), corre `agotado`, publica y deja un aviso `Agotado confirmado` para el Agente de ventas.
+   - Cuando esa fila esté en `Hecho` con "sí" en Respuesta (o la dueña te lo diga directo), corre `agotado`, publica y deja dos avisos `Agotado confirmado`: uno para el Agente de ventas y otro para el Agente de finanzas.
 7. Termina con una línea de estado: `Drop 01: 8/25 vendidos · 68% disponible · publicado.`
 
 Si no tienes acceso a la hoja, dilo y no adivines números.
