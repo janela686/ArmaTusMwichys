@@ -310,7 +310,7 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="field"><label for="calle1">Calle principal y número <span class="req">*</span></label><input id="calle1" autocomplete="address-line1" maxlength="120" placeholder="Ej. Av. Amazonas N24-56"></div>
     <div class="field"><label for="calle2">Calle secundaria <span class="req">*</span></label><input id="calle2" autocomplete="address-line2" maxlength="120" placeholder="Ej. y Av. Colón"></div>
     <div class="field"><label for="ref">Referencia <span class="req">*</span></label><input id="ref" maxlength="160" placeholder="Ej. edificio blanco, junto a la farmacia"></div>
-    <div class="field"><label for="maps">Link de tu ubicación en Google Maps <span class="req">*</span></label><input id="maps" inputmode="url" maxlength="300" placeholder="Pega aquí el link que te da Compartir en Google Maps"><span class="hint" style="text-align:left;color:var(--soft)">En Google Maps toca tu ubicación, luego Compartir y Copiar enlace.</span></div>
+    <div class="field"><label for="maps">Link de tu ubicación en Google Maps <span class="req">*</span></label><input id="maps" inputmode="url" maxlength="300" placeholder="Pega aquí el link que te da Compartir en Google Maps"><span class="hint" style="text-align:left;color:var(--soft)">En Google Maps toca tu ubicación, luego Compartir y Copiar enlace. Solo se aceptan links de Google Maps (por ejemplo maps.app.goo.gl/…).</span><span class="need" id="mapsErr" aria-live="polite"></span></div>
     <div class="field"><span class="tag">Tu pedido por WhatsApp</span><div class="msg" id="msg"></div></div>
     <button class="copy" id="copy" type="button">Copiar mensaje</button>
   </section>
@@ -411,6 +411,20 @@ $("prov").addEventListener("change",()=>{
 ["nombre","canton","calle1","calle2","ref","maps"].forEach(id=>$(id).addEventListener("input",render));
 $("canton").addEventListener("change",render);
 
+// Solo acepta links reales de Google Maps; devuelve el link limpio o "" si no es válido.
+function mapsLink(v){
+  const m=(v||"").match(/(https?:\/\/)?(maps\.app\.goo\.gl|goo\.gl\/maps|(www\.)?google\.[a-z.]{2,8}\/maps|maps\.google\.[a-z.]{2,8})[^\s<>"']*/i);
+  if(!m) return "";
+  try{
+    const u=new URL(/^https?:/i.test(m[0])?m[0]:"https://"+m[0]); const h=u.hostname.toLowerCase(), p=u.pathname;
+    if(u.protocol!=="https:"&&u.protocol!=="http:") return "";
+    if(h==="maps.app.goo.gl"&&p.length>1) return "https://"+h+p+u.search;
+    if(h==="goo.gl"&&p.startsWith("/maps/")) return "https://"+h+p+u.search;
+    if(/^(www\.)?google\.(com|com\.ec|ec|[a-z]{2}|com\.[a-z]{2}|co\.[a-z]{2})$/.test(h)&&(p==="/maps"||p.startsWith("/maps/")||p.startsWith("/maps?"))) return "https://"+h+p+u.search+u.hash;
+    if(/^maps\.google\.(com|com\.ec|ec|[a-z]{2}|com\.[a-z]{2}|co\.[a-z]{2})$/.test(h)) return "https://"+h+p+u.search+u.hash;
+  }catch(e){}
+  return "";
+}
 function lock(id,on){$(id).classList.toggle("locked",!on);}
 function render(){
   $("polColors").hidden = st.pol!=="si";
@@ -448,16 +462,19 @@ function render(){
   if(lugar) lines.push(`Cantón: ${lugar}`);
   if(dir) lines.push(`Dirección: ${dir}`);
   if($("ref").value) lines.push(`Referencia: ${$("ref").value}`);
-  if($("maps").value) lines.push(`Ubicación: ${$("maps").value}`);
+  const mapa=mapsLink($("maps").value);
+  if(mapa) lines.push(`Ubicación (Google Maps): ${mapa}`);
   const text=lines.join("\n");
   $("msg").textContent=text;
 
   const req={nombre:"tu nombre",prov:"provincia",canton:"cantón",calle1:"calle principal",calle2:"calle secundaria",ref:"referencia",maps:"link de ubicación"};
-  const faltan=Object.keys(req).filter(id=>!$(id).value.trim());
-  Object.keys(req).forEach(id=>$(id).classList.toggle("miss",tried&&!!ready&&faltan.includes(id)));
+  const mapsMal = !!$("maps").value.trim() && !mapa;
+  const faltan=Object.keys(req).filter(id=> id==="maps" ? !mapa : !$(id).value.trim());
+  $("mapsErr").textContent = mapsMal ? "Ese link no es de Google Maps. Copia el enlace desde Compartir en la app de Google Maps." : "";
+  Object.keys(req).forEach(id=>$(id).classList.toggle("miss",(tried&&!!ready&&faltan.includes(id))||(id==="maps"&&mapsMal)));
   window.__faltan=faltan; window.__ready=!!ready;
   window.__pedido={name, color:st.mw, prov, total};
-  $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? "Todos los campos deben ser rellenados" : ""));
+  $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? (faltan.length===1&&mapsMal ? "Pega un link válido de Google Maps" : "Todos los campos deben ser rellenados") : ""));
   const cta=$("cta");
   if(ready && !faltan.length){cta.removeAttribute("aria-disabled");cta.href=`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;}
   else{cta.setAttribute("aria-disabled","true");cta.href="#";}
