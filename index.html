@@ -207,17 +207,16 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 .msg{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;white-space:pre-wrap;color:var(--ink)}
 .copy{appearance:none;font:inherit;font-weight:700;border:2px solid var(--cocoa);color:var(--cocoa);background:transparent;border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer;align-self:flex-start}
 .foot{text-align:center;font-size:13px;color:var(--soft)}
-.stock{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
-.stock-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.stock-top .tag{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--rosa);flex:none}
-.stock-pct{font-family:var(--display);font-weight:600;font-size:22px;line-height:1;color:var(--cocoa);font-variant-numeric:tabular-nums}
-.stock-pct small{font-family:var(--body);font-size:13px;font-weight:700;color:var(--soft);margin-left:4px}
-.bar{height:8px;border-radius:999px;background:var(--bg);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:inherit;background:var(--rosa);transition:width .6s ease}
-.stock-msg{font-size:14px;font-weight:700;color:var(--cocoa);margin:0}
-.stock-msg span{font-weight:400;color:var(--soft)}
-.stock.out .dot,.stock.out .bar i{background:var(--soft)}
+.stock{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;margin-top:12px}
+.stock-txt{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#F1E2D2}
+.stock-txt b{color:#EC9AB0}
+.dot{width:7px;height:7px;border-radius:50%;background:#EC9AB0;flex:none}
+.stock-cta{display:inline-flex;align-items:center;gap:6px;background:#EC9AB0;color:#2B1C16;text-decoration:none;font-weight:800;font-size:13px;border-radius:999px;padding:7px 14px;min-height:36px}
+.stock-cta:hover{background:#F1E2D2}
+.stock-cta:focus-visible{outline:3px solid #F1E2D2;outline-offset:2px}
+.stock.out .dot{background:#C7AE9C}.stock.out .stock-cta{display:none}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+#s1{scroll-margin-top:16px}
 .sum-urg{font-size:12.5px;font-weight:700;color:var(--rosa-ink)}
 .sum-urg:empty{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -234,6 +233,11 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
       <span class="chip">Drop 01 · abre <b>[fecha]</b></span>
       <span class="chip">Entrega <b>[fecha]</b></span>
     </div>
+    <!-- DISPONIBILIDAD: cambia SOLO el número de data-disponible cuando entren pedidos (100, 80, 50...). 0 = agotado. -->
+    <div class="stock" id="stock" data-disponible="100">
+      <span class="stock-txt"><span class="dot" aria-hidden="true"></span><span id="stockMsg">Cupos limitados · <b>100%</b> disponible</span></span>
+      <a class="stock-cta" href="#s1">Aparta el tuyo <span aria-hidden="true">↓</span></a>
+    </div>
     <div class="follow">
       <span class="follow-t">Síguenos para no perderte ningún drop</span>
       <a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram @mwichys</a>
@@ -242,17 +246,6 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
   </header>
   <div class="rib" aria-hidden="true"></div>
 
-  <!-- ===== DISPONIBILIDAD DEL DROP =====
-       Cambia SOLO el número de data-disponible cuando entren pedidos: 100, 80, 50, 20... y 0 = agotado.
-       El mensaje y la barra se ajustan solos. -->
-  <section class="stock" id="stock" data-disponible="100" aria-label="disponibilidad del drop 01">
-    <div class="stock-top">
-      <span class="tag"><span class="dot" aria-hidden="true"></span>Drop 01</span>
-      <span class="stock-pct"><b id="stockPct">100%</b><small>disponible</small></span>
-    </div>
-    <div class="bar" role="progressbar" aria-label="cupos disponibles" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="stockBar" style="width:100%"></i></div>
-    <p class="stock-msg" id="stockMsg">Cupos limitados. <span>Cuando se acaben, este drop no se repite.</span></p>
-  </section>
 
   <div class="hero">
     <img src="img/isologo.svg" alt="" width="220" height="259">
@@ -452,15 +445,9 @@ function mapsLink(v){
 // Disponibilidad: lee el número de data-disponible y ajusta barra, textos y urgencia.
 const DISP = Math.max(0, Math.min(100, parseInt($("stock").dataset.disponible, 10) || 0));
 (function(){
-  const t = DISP===0 ? ["Drop 01 agotado.","Síguenos para enterarte del próximo."]
-          : DISP<=15 ? ["Últimos cupos.","Si los quieres, este es el momento."]
-          : DISP<=35 ? ["Quedan pocos cupos.","Cuando se acaben, este drop no se repite."]
-          : DISP<=70 ? ["Ya se apartaron varios cupos.","Cuando se acaben, este drop no se repite."]
-          : ["Cupos limitados.","Cuando se acaben, este drop no se repite."];
-  $("stockPct").textContent = DISP+"%";
-  $("stockBar").style.width = Math.max(DISP,2)+"%";
-  document.querySelector("#stock .bar").setAttribute("aria-valuenow", DISP);
-  const m=$("stockMsg"); m.textContent=t[0]+" "; const sp=document.createElement("span"); sp.textContent=t[1]; m.appendChild(sp);
+  const m=$("stockMsg"); m.textContent="";
+  if(DISP===0){ m.textContent="Drop 01 agotado"; }
+  else { m.append("Cupos limitados · "); const bb=document.createElement("b"); bb.textContent=DISP+"%"; m.append(bb," disponible"); }
   $("stock").classList.toggle("out", DISP===0);
   $("sumUrg").textContent = DISP===0 ? "Drop agotado" : (DISP<=35 ? "Quedan "+DISP+"% de cupos" : "");
 })();
@@ -530,6 +517,7 @@ $("cta").addEventListener("click",e=>{
   if(window.__ready && window.__faltan.length){const f=$(window.__faltan[0]); f.scrollIntoView({behavior:"smooth",block:"center"}); f.focus({preventScroll:true});}
   else { const l=document.querySelector(".step:not(.locked) ~ .step.locked")||$("s1"); const prev=l.previousElementSibling; (prev&&prev.classList.contains("step")?prev:$("s1")).scrollIntoView({behavior:"smooth",block:"center"}); }
 });
+document.querySelector(".stock-cta").addEventListener("click",()=>track("aparta_click",{}));
 $("copy").addEventListener("click",()=>{
   const t=$("msg").textContent;
   track("copiar_mensaje",{});
