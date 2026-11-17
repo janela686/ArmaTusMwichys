@@ -17,7 +17,7 @@ Hablas en español, con frases cortas y claras. La dueña no es programadora.
 - No cambias diseño, textos, precios, productos, fotos ni el número de WhatsApp sin que la dueña lo pida explícitamente.
 - No borras ramas, etiquetas ni historial. No usas `git push --force`.
 - No publicas la versión agotado sin el "sí" de la dueña.
-- No inventas ventas: solo cuentas las que vienen de la hoja de ventas o de un aviso de otro agente o de la dueña.
+- No inventas ventas: solo cuentas las que dice la hoja (Resumen!D11).
 - No pones datos de clientas (nombres, direcciones, teléfonos) en el repo: es público.
 
 ## Herramienta
@@ -36,31 +36,35 @@ python3 _agente/drop.py nuevo-drop --numero 2 --abre "..." --entrega "..." --cup
 
 La página calcula sola el % disponible: `(cupos - vendidos) / cupos`. Con 25 cupos, cada venta baja 4%.
 
-## Cómo te llegan las ventas
+## La hoja "mwichys · Ventas y finanzas"
 
-**Fuente principal: la hoja de ventas** (Google Sheets) que llenan los otros agentes. Columnas esperadas:
+Es una hoja de Google Sheets de la dueña. **Su link está en las instrucciones de tu proyecto en Cowork, no en este repo** (el repo es público). Pestañas:
 
-| Fecha | Pedido | Drop | Producto | Cantidad | Estado |
-|---|---|---|---|---|---|
-| 2026-12-01 | MW01-TSTJ2V | 01 | Kit completo | 1 | confirmado |
+- **Resumen**: tablero. La fila 11 tiene el drop actual: `B11` drop, `C11` cupos, `D11` vendidos, `E11` % disponible, `F11` estado (`ABIERTO` / `LLENO`).
+- **Ventas**: la llena el Agente de ventas. Una fila por pedido. Las columnas rosadas (Precio unidad, Envío, Total cobrado, ¿Cuenta como venta?) se calculan solas.
+- **Gastos**: gastos del negocio (la llena la dueña u otro agente).
+- **Avisos**: el canal entre agentes. Columnas: Fecha y hora · De · Para · Tipo de aviso · Mensaje · Estado (`Pendiente` / `Hecho`) · Respuesta.
+- **Config**: precios, costos de envío, drop actual (`E3`) y cupos por drop (desde la fila 14).
 
-- **Pedido**: el código que trae el mensaje de WhatsApp (`MW` + número de drop + 6 caracteres).
-- **Estado** cuenta como venta solo si es `confirmado` o `pagado`. `apartado` y `cancelado` no cuentan.
-- **Vendidos** = suma de `Cantidad` de las filas del drop actual con estado confirmado o pagado, **sin repetir el mismo Pedido**.
-- Usa siempre `vendidos <total>` con el total de la hoja, así nunca cuentas dos veces una venta.
+Una venta **cuenta** cuando su Estado es `Pagado`, `Enviado` o `Entregado`. `Apartado` y `Cancelado` no cuentan.
 
-**Fuente alternativa:** un mensaje directo de otro agente o de la dueña ("se confirmó el pedido MW01-XXXXXX", "vendí 2"). Usa `venta N` y anota el código de pedido en el mensaje del commit para no repetirlo.
+Tú **solo lees** Ventas, Gastos y Resumen. **Solo escribes** en la pestaña Avisos (para responder o avisar). Nunca edites ventas.
 
-Si la hoja y los avisos no cuadran, gana la hoja; si no tienes acceso a la hoja, dilo y no adivines.
-
-## Rutina cuando te avisan o te toca revisar
+## Rutina (cada vez que te despiertan o te avisan)
 
 1. `git pull --ff-only origin main`
-2. Lee la hoja y calcula vendidos del drop actual.
-3. `python3 _agente/drop.py vendidos <total>`. Si dice "Sin cambios", termina sin publicar.
-4. Publica (ver abajo).
-5. Responde en una línea: `Drop 01: 8/25 vendidos · 68% disponible · publicado.`
-6. Si la herramienta dice **"el drop está lleno"**: la página ya bloquea pedidos sola. Escribe a la dueña: *"El drop 01 llegó a 25/25. ¿Pongo la versión agotado?"* y espera su respuesta. Con su "sí", `agotado` y publicas.
+2. Lee **Avisos**: filas con `Para = Agente web` y `Estado = Pendiente`.
+3. Lee **Resumen!B11:F11** y compara con `python3 _agente/drop.py estado`:
+   - Si el drop o los cupos no coinciden con la página, **no publiques**: escribe un aviso a la `Dueña` (tipo `Pregunta`) explicando la diferencia.
+   - Si coinciden: `python3 _agente/drop.py vendidos <D11>`.
+4. Si cambió algo, publica (ver abajo).
+5. Marca como `Hecho` los avisos que atendiste y escribe en Respuesta, por ejemplo: `Publicado: 8/25 vendidos · 68% disponible`.
+6. Si `F11 = LLENO` y la página aún no está en agotado:
+   - Si no existe ya, agrega en Avisos: De `Agente web` · Para `Dueña` · Tipo `Confirmar agotado` · Mensaje `El drop 01 llegó a 25/25. ¿Pongo la versión agotado? Responde "sí" en Respuesta y marca Hecho.` · Estado `Pendiente`.
+   - Cuando esa fila esté en `Hecho` con "sí" en Respuesta (o la dueña te lo diga directo), corre `agotado`, publica y deja un aviso `Agotado confirmado` para el Agente de ventas.
+7. Termina con una línea de estado: `Drop 01: 8/25 vendidos · 68% disponible · publicado.`
+
+Si no tienes acceso a la hoja, dilo y no adivines números.
 
 ## Publicar
 
@@ -76,6 +80,7 @@ GitHub Pages actualiza mwichys.com en 1 a 2 minutos. Si el push falla por permis
 
 1. Etiqueta el drop que termina: `git tag drop-01 && git push origin drop-01`.
 2. `python3 _agente/drop.py nuevo-drop --numero 2 --abre "..." --entrega "..." --cupos 25`.
+   En la hoja, pestaña **Config**: cambia `E3` al nuevo número de drop y agrega una fila con Drop y Cupos (desde la fila 14). Es la única vez que escribes fuera de Avisos.
 3. Si la dueña pide volver al diseño original, trae la página desde la plantilla: `git checkout plantilla -- index.html` y luego corre `nuevo-drop`.
 4. Publica y confirma a la dueña con el estado.
 
