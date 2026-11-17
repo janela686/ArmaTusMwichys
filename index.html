@@ -8,6 +8,8 @@
 <link rel="canonical" href="https://mwichys.com/">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#5B3A2E">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="/img/isotipo.svg" type="image/svg+xml">
 <link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
@@ -217,7 +219,8 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="drop">
       <span class="chip">Drop 01 · abre <b>[fecha]</b></span>
       <span class="chip">Entrega <b>[fecha]</b></span>
-      <span class="chip">Solo <b>25 cupos</b></span>
+      <!-- DISPONIBILIDAD: cambia el número cuando entren pedidos (100%, 80%, 50%...). Si llega a 0, escribe: <span class="chip"><b>Agotado</b></span> -->
+      <span class="chip">Disponible <b>100%</b></span>
     </div>
     <div class="follow">
       <span class="follow-t">Síguenos para no perderte ningún drop</span>
@@ -296,17 +299,17 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
   <section class="step locked" id="s4" aria-labelledby="h4">
     <div class="step-head"><span class="tag">Paso 4 · tus datos</span></div>
     <h2 id="h4">¿A dónde te las enviamos?</h2>
-    <div class="field"><label for="nombre">Tu nombre <span class="req">*</span></label><input id="nombre" autocomplete="name" placeholder="Ej. Valentina"></div>
+    <div class="field"><label for="nombre">Tu nombre <span class="req">*</span></label><input id="nombre" autocomplete="name" maxlength="80" placeholder="Ej. Valentina"></div>
     <div class="field"><label for="prov">Provincia <span class="req">*</span></label>
       <select id="prov"><option value="">Elige tu provincia</option></select>
     </div>
     <div class="field"><label for="canton">Cantón <span class="req">*</span></label>
       <select id="canton" disabled><option value="">Primero elige la provincia</option></select>
     </div>
-    <div class="field"><label for="calle1">Calle principal y número <span class="req">*</span></label><input id="calle1" autocomplete="address-line1" placeholder="Ej. Av. Amazonas N24-56"></div>
-    <div class="field"><label for="calle2">Calle secundaria <span class="req">*</span></label><input id="calle2" autocomplete="address-line2" placeholder="Ej. y Av. Colón"></div>
-    <div class="field"><label for="ref">Referencia <span class="req">*</span></label><input id="ref" placeholder="Ej. edificio blanco, junto a la farmacia"></div>
-    <div class="field"><label for="maps">Link de tu ubicación en Google Maps <span class="req">*</span></label><input id="maps" inputmode="url" placeholder="Pega aquí el link que te da Compartir en Google Maps"><span class="hint" style="text-align:left;color:var(--soft)">En Google Maps toca tu ubicación, luego Compartir y Copiar enlace.</span></div>
+    <div class="field"><label for="calle1">Calle principal y número <span class="req">*</span></label><input id="calle1" autocomplete="address-line1" maxlength="120" placeholder="Ej. Av. Amazonas N24-56"></div>
+    <div class="field"><label for="calle2">Calle secundaria <span class="req">*</span></label><input id="calle2" autocomplete="address-line2" maxlength="120" placeholder="Ej. y Av. Colón"></div>
+    <div class="field"><label for="ref">Referencia <span class="req">*</span></label><input id="ref" maxlength="160" placeholder="Ej. edificio blanco, junto a la farmacia"></div>
+    <div class="field"><label for="maps">Link de tu ubicación en Google Maps <span class="req">*</span></label><input id="maps" inputmode="url" maxlength="300" placeholder="Pega aquí el link que te da Compartir en Google Maps"><span class="hint" style="text-align:left;color:var(--soft)">En Google Maps toca tu ubicación, luego Compartir y Copiar enlace.</span></div>
     <div class="field"><span class="tag">Tu pedido por WhatsApp</span><div class="msg" id="msg"></div></div>
     <button class="copy" id="copy" type="button">Copiar mensaje</button>
   </section>
@@ -346,6 +349,17 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 </div>
 
 <script>
+// Estadísticas (Google Analytics 4). Pega tu ID de medición, por ejemplo "G-AB12CD34EF". Vacío = sin estadísticas.
+const GA_ID = "";
+if (/^G-[A-Z0-9]+$/.test(GA_ID)) {
+  const g = document.createElement("script"); g.async = true;
+  g.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID; document.head.appendChild(g);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag("js", new Date()); gtag("config", GA_ID, {anonymize_ip: true});
+}
+function track(name, params){ if (window.gtag) gtag("event", name, Object.assign({transport_type: "beacon"}, params)); }
+
 const WA = "593000000000"; // [tu número de WhatsApp con 593, sin el 0 inicial]
 const st = {mw:null, pol:null, pc:null, mu:null};
 let tried=false;
@@ -441,19 +455,26 @@ function render(){
   const faltan=Object.keys(req).filter(id=>!$(id).value.trim());
   Object.keys(req).forEach(id=>$(id).classList.toggle("miss",tried&&!!ready&&faltan.includes(id)));
   window.__faltan=faltan; window.__ready=!!ready;
+  window.__pedido={name, color:st.mw, prov, total};
   $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? "Todos los campos deben ser rellenados" : ""));
   const cta=$("cta");
   if(ready && !faltan.length){cta.removeAttribute("aria-disabled");cta.href=`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;}
   else{cta.setAttribute("aria-disabled","true");cta.href="#";}
 }
 $("cta").addEventListener("click",e=>{
-  if($("cta").getAttribute("aria-disabled")!=="true") return;
+  if($("cta").getAttribute("aria-disabled")!=="true"){
+    const o=window.__pedido||{};
+    track("whatsapp_click",{producto:o.name,color:o.color,provincia:o.prov,value:o.total,currency:"USD"});
+    return;
+  }
+  track("whatsapp_intento_incompleto",{faltan:(window.__faltan||[]).length});
   e.preventDefault(); tried=true; render();
   if(window.__ready && window.__faltan.length){const f=$(window.__faltan[0]); f.scrollIntoView({behavior:"smooth",block:"center"}); f.focus({preventScroll:true});}
   else { const l=document.querySelector(".step:not(.locked) ~ .step.locked")||$("s1"); const prev=l.previousElementSibling; (prev&&prev.classList.contains("step")?prev:$("s1")).scrollIntoView({behavior:"smooth",block:"center"}); }
 });
 $("copy").addEventListener("click",()=>{
   const t=$("msg").textContent;
+  track("copiar_mensaje",{});
   navigator.clipboard.writeText(t).then(()=>{$("copy").textContent="Mensaje copiado";},()=>{
     const r=document.createRange();r.selectNodeContents($("msg"));const s=getSelection();s.removeAllRanges();s.addRange(r);
     $("copy").textContent="Selecciónalo y cópialo";});
