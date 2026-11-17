@@ -155,7 +155,7 @@ p{margin:0;color:var(--soft)}
 .band p{color:#F1E2D2;font-size:14px;max-width:44ch}
 .band .about{font-size:15px;line-height:1.55}
 .facts{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700}
-.facts span{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.facts > span{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .facts svg{width:18px;height:18px;flex:none}
 .social{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .social span{border:1.5px solid rgba(241,226,210,.5);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800}
@@ -237,11 +237,6 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="stock" id="stock" data-disponible="100">
       <span class="stock-txt"><span class="dot" aria-hidden="true"></span><span id="stockMsg">Cupos limitados · <b>100%</b> disponible</span></span>
       <a class="stock-cta" href="#s1">Aparta el tuyo <span aria-hidden="true">↓</span></a>
-    </div>
-    <div class="follow">
-      <span class="follow-t">Síguenos para no perderte ningún drop</span>
-      <a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram @mwichys</a>
-      <a href="https://www.tiktok.com/@mwichys" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.8 2.4 4.6 5 5"/></svg>TikTok @mwichys</a>
     </div>
   </header>
   <div class="rib" aria-hidden="true"></div>
@@ -346,9 +341,13 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="facts">
       <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Norte de Quito, sector Andalucía · Ecuador</span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Envíos a todo el país por Tramaco o Servientrega</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10h-13zM8 9V7a4 4 0 0 1 8 0v2"/></svg>Tienda online · pedidos por WhatsApp <a href="https://wa.me/593982605158" target="_blank" rel="noopener" style="color:#EC9AB0">098 260 5158</a></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10h-13zM8 9V7a4 4 0 0 1 8 0v2"/></svg><span>Tienda online · pedidos por WhatsApp <a href="https://wa.me/593982605158" target="_blank" rel="noopener" style="color:#EC9AB0;white-space:nowrap">098 260 5158</a></span></span>
     </div>
-    <div class="social" aria-label="redes sociales"><a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener">Instagram @mwichys</a><a href="https://www.tiktok.com/@mwichys" target="_blank" rel="noopener">TikTok @mwichys</a></div>
+    <div class="follow">
+      <span class="follow-t">Síguenos para no perderte ningún drop</span>
+      <a href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram @mwichys</a>
+      <a href="https://www.tiktok.com/@mwichys" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.8 2.4 4.6 5 5"/></svg>TikTok @mwichys</a>
+    </div>
     <p class="copyr">© 2026 mwichys · Todos los derechos reservados</p>
   </footer>
 </div>
