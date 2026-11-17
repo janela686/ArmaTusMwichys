@@ -217,7 +217,18 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 .stock-cta{display:inline-flex;align-items:center;gap:6px;background:#EC9AB0;color:#2B1C16;text-decoration:none;font-weight:800;font-size:13px;border-radius:999px;padding:7px 14px;min-height:36px}
 .stock-cta:hover{background:#F1E2D2}
 .stock-cta:focus-visible{outline:3px solid #F1E2D2;outline-offset:2px}
-.stock.out .dot{background:#C7AE9C}.stock.out .stock-cta{display:none}
+.stock.out .dot{background:#C7AE9C}
+.soldout{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.soldout img{width:88px;height:auto}
+.soldout .eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--rosa-ink)}
+.soldout h2{font-size:26px}
+.soldout p{max-width:36ch}
+.soldout .btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px}
+.btn-rosa,.btn-line{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 18px;border-radius:999px;font-weight:800;font-size:15px;text-decoration:none}
+.btn-rosa{background:var(--rosa);color:#2B1C16}
+.btn-line{border:2px solid var(--cocoa);color:var(--cocoa)}
+.btn-rosa:focus-visible,.btn-line:focus-visible{outline:3px solid var(--rosa);outline-offset:2px}
+body.agotado{padding-bottom:32px}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 #s1{scroll-margin-top:16px}
 .sum-urg{font-size:12.5px;font-weight:700;color:var(--rosa-ink)}
@@ -233,11 +244,11 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="brand-sub">Peluditas, frescas y muy tuyas</div>
     <div class="brand-sub" style="margin-top:4px"><b style="color:#EC9AB0">Inspiradas en el estilo Y2K</b></div>
     <div class="drop">
-      <span class="chip">Drop 01 · abre <b>[fecha]</b></span>
-      <span class="chip">Entrega <b>[fecha]</b></span>
+      <span class="chip">Drop <span class="dropN">01</span> · abre <b id="fAbre">[fecha]</b></span>
+      <span class="chip">Entrega <b id="fEntrega">[fecha]</b></span>
     </div>
-    <!-- DISPONIBILIDAD: cambia SOLO el número de data-disponible cuando entren pedidos (100, 80, 50...). 0 = agotado. -->
-    <div class="stock" id="stock" data-disponible="100">
+    <!-- La disponibilidad se cambia en la CONFIGURACIÓN DEL DROP, al inicio del <script> de abajo. -->
+    <div class="stock" id="stock">
       <span class="stock-txt"><span class="dot" aria-hidden="true"></span><span id="stockMsg">Cupos limitados · <b>100%</b> disponible</span></span>
       <a class="stock-cta" href="#s1">Aparta el tuyo <span aria-hidden="true">↓</span></a>
     </div>
@@ -252,6 +263,17 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
       <p>Elige tu color en tres toques, suma lo que quieras y aparta tu cupo por WhatsApp.</p>
     </div>
   </div>
+
+  <section class="soldout" id="soldout" aria-labelledby="hSold" hidden>
+    <img src="img/isologo.svg" alt="" width="220" height="259">
+    <span class="eyebrow">Drop <span class="dropN">01</span> · agotado</span>
+    <h2 id="hSold">¡Volaron! Gracias por tanto amor peludito</h2>
+    <p>Todos los cupos de este drop ya tienen dueña. Estamos preparando el siguiente y queremos que seas de las primeras en saberlo.</p>
+    <div class="btns">
+      <a class="btn-rosa" id="avisame" href="https://wa.me/593982605158" target="_blank" rel="noopener">Avísame del próximo drop</a>
+      <a class="btn-line" href="https://www.instagram.com/mwichys/" target="_blank" rel="noopener">Ver Instagram</a>
+    </div>
+  </section>
 
   <section class="step" id="s1" aria-labelledby="h1t">
     <div class="step-head"><span class="tag">Paso 1 · la principal</span><span class="price">$23</span></div>
@@ -330,7 +352,7 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
   </section>
 
   <section class="soon" aria-labelledby="h6">
-    <span class="eyebrow">Próximamente · drop 02</span>
+    <span class="eyebrow">Próximamente · drop <span id="dropNext">02</span></span>
     <h2 id="h6">Algo nuevo se está preparando</h2>
     <div class="mystery" aria-hidden="true"><i><b>?</b></i><i><b>?</b></i><i><b>?</b></i></div>
     <p>Nuevos colores vienen en camino. ¿Adivinas cuáles? Síguenos para enterarte primero.</p>
@@ -369,6 +391,17 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 </div>
 
 <script>
+/* ==========================================================
+   CONFIGURACIÓN DEL DROP · lo único que cambias en cada drop
+   ========================================================== */
+const DROP = {
+  numero: 1,             // número del drop: 1, 2, 3...
+  abre: "[fecha]",       // ej. "1 de diciembre"
+  entrega: "[fecha]",    // ej. "15 de diciembre"
+  disponible: 100        // % de cupos que quedan: 100, 70, 30... 0 = AGOTADO
+};
+/* ========================================================== */
+
 // Estadísticas (Google Analytics 4). Pega tu ID de medición, por ejemplo "G-AB12CD34EF". Vacío = sin estadísticas.
 const GA_ID = "G-MGZNF0P02E";
 if (/^G-[A-Z0-9]+$/.test(GA_ID)) {
@@ -384,7 +417,8 @@ const WA = "593982605158"; // WhatsApp de mwichys: 098 260 5158
 const st = {mw:null, pol:null, pc:null, mu:null};
 let tried=false;
 // Número de pedido aleatorio y distinto para cada persona (6 caracteres, sin 0/O ni 1/I para que no se confundan).
-const ORDER = "MW01-" + (()=>{const A="23456789ABCDEFGHJKLMNPQRSTUVWXYZ",r=new Uint8Array(6);crypto.getRandomValues(r);return Array.from(r,x=>A[x%32]).join("");})();
+const NN = String(DROP.numero).padStart(2,"0"), NEXT = String(DROP.numero+1).padStart(2,"0");
+const ORDER = "MW"+NN+"-" + (()=>{const A="23456789ABCDEFGHJKLMNPQRSTUVWXYZ",r=new Uint8Array(6);crypto.getRandomValues(r);return Array.from(r,x=>A[x%32]).join("");})();
 const $ = id => document.getElementById(id);
 
 document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click",()=>{
@@ -445,14 +479,27 @@ function mapsLink(v){
   }catch(e){}
   return "";
 }
-// Disponibilidad: lee el número de data-disponible y ajusta barra, textos y urgencia.
-const DISP = Math.max(0, Math.min(100, parseInt($("stock").dataset.disponible, 10) || 0));
+// Aplica la configuración del drop: número, fechas, disponibilidad y modo agotado.
+const DISP = Math.max(0, Math.min(100, parseInt(DROP.disponible, 10) || 0));
 (function(){
+  document.querySelectorAll(".dropN").forEach(e=>e.textContent=NN);
+  $("dropNext").textContent = NEXT;
+  $("fAbre").textContent = DROP.abre; $("fEntrega").textContent = DROP.entrega;
   const m=$("stockMsg"); m.textContent="";
-  if(DISP===0){ m.textContent="Drop 01 agotado"; }
+  if(DISP===0){ m.textContent="Drop "+NN+" agotado"; }
   else { m.append("Cupos limitados · "); const bb=document.createElement("b"); bb.textContent=DISP+"%"; m.append(bb," disponible"); }
   $("stock").classList.toggle("out", DISP===0);
-  $("sumUrg").textContent = DISP===0 ? "Drop agotado" : (DISP<=35 ? "Quedan "+DISP+"% de cupos" : "");
+  $("sumUrg").textContent = DISP<=35 && DISP>0 ? "Quedan "+DISP+"% de cupos" : "";
+  if(DISP===0){
+    const aviso = "https://wa.me/"+WA+"?text="+encodeURIComponent("¡Hola mwichys! Quiero que me avisen cuando salga el drop "+NEXT);
+    $("avisame").href = aviso;
+    const c=document.querySelector(".stock-cta"); c.href="#soldout"; c.firstChild.textContent="Avísame del próximo ";
+    $("soldout").hidden=false;
+    ["s1","s2","s3","s4"].forEach(id=>$(id).hidden=true);
+    document.querySelector(".hero").hidden=true;
+    document.querySelector(".summary").hidden=true;
+    document.body.classList.add("agotado");
+  }
 })();
 function lock(id,on){$(id).classList.toggle("locked",!on);}
 function render(){
@@ -483,7 +530,7 @@ function render(){
 
   const lugar = cant ? `${cant}, ${prov}` : "";
   const dir = [$("calle1").value, $("calle2").value].filter(Boolean).join(" ");
-  const lines=[`¡Hola mwichys! Quiero apartar mi cupo del drop 01`, `Pedido n.º ${ORDER}`, ``, `• ${name}`, `• Mwichys: ${st.mw||"-"}`];
+  const lines=[`¡Hola mwichys! Quiero apartar mi cupo del drop ${NN}`, `Pedido n.º ${ORDER}`, ``, `• ${name}`, `• Mwichys: ${st.mw||"-"}`];
   if(pol) lines.push(`• Polainas: ${st.pc}`);
   if(kit) lines.push(`• Muñequeras a juego + estrellitas de regalo`);
   lines.push(``, `Producto: ${money(price)}`, `Envío: ${kit?"gratis":(cant?money(envio):"según mi cantón")}`, `Total a pagar: ${money(total)}`, ``);
@@ -521,6 +568,7 @@ $("cta").addEventListener("click",e=>{
   else { const l=document.querySelector(".step:not(.locked) ~ .step.locked")||$("s1"); const prev=l.previousElementSibling; (prev&&prev.classList.contains("step")?prev:$("s1")).scrollIntoView({behavior:"smooth",block:"center"}); }
 });
 $("waFoot").addEventListener("click",()=>track("whatsapp_pie_click",{}));
+$("avisame").addEventListener("click",()=>track("avisame_click",{drop:NEXT}));
 document.querySelector(".stock-cta").addEventListener("click",()=>track("aparta_click",{}));
 $("copy").addEventListener("click",()=>{
   const t=$("msg").textContent;
