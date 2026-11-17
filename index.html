@@ -207,6 +207,30 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 .msg{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;white-space:pre-wrap;color:var(--ink)}
 .copy{appearance:none;font:inherit;font-weight:700;border:2px solid var(--cocoa);color:var(--cocoa);background:transparent;border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer;align-self:flex-start}
 .foot{text-align:center;font-size:13px;color:var(--soft)}
+.stock{background:#2B1C16;color:#F1E2D2;border-radius:22px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid #EC9AB0;box-shadow:0 10px 28px rgba(236,154,176,.28)}
+.stock-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#EC9AB0}
+.dot{width:10px;height:10px;border-radius:50%;background:#FF4D6D;box-shadow:0 0 0 0 rgba(255,77,109,.7)}
+.stock-pct{font-family:var(--display);font-weight:600;font-size:34px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.stock-pct small{font-size:15px;color:#E8D7C6;margin-left:4px}
+.stock-msg{font-family:var(--display);font-weight:600;font-size:21px;line-height:1.2;color:#fff;margin:0;text-wrap:balance}
+.bar{height:14px;border-radius:999px;background:rgba(241,226,210,.16);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#FF4D6D,#EC9AB0);background-size:200% 100%}
+.stock-sub{font-size:13px;color:#E8D7C6;margin:0}
+.stock.low{border-color:#FF4D6D;box-shadow:0 10px 28px rgba(255,77,109,.35)}
+.stock.out .dot{background:#9b8b80;animation:none}.stock.out .bar i{background:#9b8b80}
+.sum-urg{font-size:12px;font-weight:800;color:#C2185B}
+:root[data-theme="dark"] .sum-urg{color:#FF8FA9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sum-urg{color:#FF8FA9}}
+.sum-urg:empty{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .dot{animation:pulse 1.4s ease-out infinite}
+  .bar i{animation:shine 2.4s linear infinite}
+  .stock.low .stock-pct{animation:beat 1.2s ease-in-out infinite}
+}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,77,109,0)}100%{box-shadow:0 0 0 0 rgba(255,77,109,0)}}
+@keyframes shine{from{background-position:200% 0}to{background-position:0 0}}
+@keyframes beat{50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -220,8 +244,6 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <div class="drop">
       <span class="chip">Drop 01 · abre <b>[fecha]</b></span>
       <span class="chip">Entrega <b>[fecha]</b></span>
-      <!-- DISPONIBILIDAD: cambia el número cuando entren pedidos (100%, 80%, 50%...). Si llega a 0, escribe: <span class="chip"><b>Agotado</b></span> -->
-      <span class="chip">Disponible <b>100%</b></span>
     </div>
     <div class="follow">
       <span class="follow-t">Síguenos para no perderte ningún drop</span>
@@ -230,6 +252,19 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     </div>
   </header>
   <div class="rib" aria-hidden="true"></div>
+
+  <!-- ===== DISPONIBILIDAD DEL DROP =====
+       Cambia SOLO el número de data-disponible cuando entren pedidos: 100, 80, 50, 20... y 0 = agotado.
+       El mensaje y la barra se ajustan solos. -->
+  <section class="stock" id="stock" data-disponible="100" aria-labelledby="stockMsg">
+    <div class="stock-top">
+      <span class="live"><span class="dot" aria-hidden="true"></span>Drop 01 · en vivo</span>
+      <span class="stock-pct"><b id="stockPct">100%</b><small>disponible</small></span>
+    </div>
+    <div class="bar" role="progressbar" aria-label="cupos disponibles" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="stockBar" style="width:100%"></i></div>
+    <p class="stock-msg" id="stockMsg">Cupos limitados: cuando se acaben, este drop no vuelve</p>
+    <p class="stock-sub" id="stockSub">Aparta el tuyo por WhatsApp antes de que se llene.</p>
+  </section>
 
   <div class="hero">
     <img src="img/isologo.svg" alt="" width="220" height="259">
@@ -343,6 +378,7 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
       <div class="sum-name" id="sumName">Elige el color de tus mwichys</div>
       <div class="sum-price" id="sumPrice">$23</div>
       <div class="sum-ship" id="sumShip">+ envío</div>
+      <div class="sum-urg" id="sumUrg"></div>
       <div class="need" id="need" aria-live="polite"></div>
     </div>
     <a class="cta" id="cta" href="#" target="_blank" rel="noopener" aria-disabled="true">Pedir por WhatsApp</a>
@@ -425,6 +461,22 @@ function mapsLink(v){
   }catch(e){}
   return "";
 }
+// Disponibilidad: lee el número de data-disponible y ajusta barra, textos y urgencia.
+const DISP = Math.max(0, Math.min(100, parseInt($("stock").dataset.disponible, 10) || 0));
+(function(){
+  const t = DISP===0 ? ["¡Agotado! El drop 01 se acabó","Síguenos en Instagram o TikTok para el próximo drop."]
+          : DISP<=15 ? ["¡Últimos cupos! Esto se acaba hoy","Si lo quieres, apártalo ya. No habrá reposición."]
+          : DISP<=35 ? ["¡Se están yendo volando!","Ya casi no quedan cupos de este drop."]
+          : DISP<=70 ? ["Ya se apartaron varios cupos","Cuando se acaben, este drop no vuelve."]
+          : ["Cupos limitados: cuando se acaben, este drop no vuelve","Aparta el tuyo por WhatsApp antes de que se llene."];
+  $("stockPct").textContent = DISP===0 ? "0%" : DISP+"%";
+  $("stockBar").style.width = Math.max(DISP,3)+"%";
+  document.querySelector("#stock .bar").setAttribute("aria-valuenow", DISP);
+  $("stockMsg").textContent = t[0]; $("stockSub").textContent = t[1];
+  $("stock").classList.toggle("low", DISP>0 && DISP<=35);
+  $("stock").classList.toggle("out", DISP===0);
+  $("sumUrg").textContent = DISP===0 ? "Drop agotado" : (DISP<=35 ? "🔥 Quedan "+DISP+"% de cupos" : "🔥 Drop limitado · "+DISP+"% disponible");
+})();
 function lock(id,on){$(id).classList.toggle("locked",!on);}
 function render(){
   $("polColors").hidden = st.pol!=="si";
@@ -476,6 +528,7 @@ function render(){
   window.__pedido={name, color:st.mw, prov, total};
   $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? (faltan.length===1&&mapsMal ? "Pega un link válido de Google Maps" : "Todos los campos deben ser rellenados") : ""));
   const cta=$("cta");
+  if(DISP===0){cta.setAttribute("aria-disabled","true");cta.href="#";$("need").textContent="Drop agotado";return;}
   if(ready && !faltan.length){cta.removeAttribute("aria-disabled");cta.href=`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;}
   else{cta.setAttribute("aria-disabled","true");cta.href="#";}
 }
