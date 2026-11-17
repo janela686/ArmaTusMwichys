@@ -207,30 +207,19 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
 .msg{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;white-space:pre-wrap;color:var(--ink)}
 .copy{appearance:none;font:inherit;font-weight:700;border:2px solid var(--cocoa);color:var(--cocoa);background:transparent;border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer;align-self:flex-start}
 .foot{text-align:center;font-size:13px;color:var(--soft)}
-.stock{background:#2B1C16;color:#F1E2D2;border-radius:22px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid #EC9AB0;box-shadow:0 10px 28px rgba(236,154,176,.28)}
-.stock-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.live{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#EC9AB0}
-.dot{width:10px;height:10px;border-radius:50%;background:#FF4D6D;box-shadow:0 0 0 0 rgba(255,77,109,.7)}
-.stock-pct{font-family:var(--display);font-weight:600;font-size:34px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
-.stock-pct small{font-size:15px;color:#E8D7C6;margin-left:4px}
-.stock-msg{font-family:var(--display);font-weight:600;font-size:21px;line-height:1.2;color:#fff;margin:0;text-wrap:balance}
-.bar{height:14px;border-radius:999px;background:rgba(241,226,210,.16);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#FF4D6D,#EC9AB0);background-size:200% 100%}
-.stock-sub{font-size:13px;color:#E8D7C6;margin:0}
-.stock.low{border-color:#FF4D6D;box-shadow:0 10px 28px rgba(255,77,109,.35)}
-.stock.out .dot{background:#9b8b80;animation:none}.stock.out .bar i{background:#9b8b80}
-.sum-urg{font-size:12px;font-weight:800;color:#C2185B}
-:root[data-theme="dark"] .sum-urg{color:#FF8FA9}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sum-urg{color:#FF8FA9}}
+.stock{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.stock-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.stock-top .tag{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--rosa);flex:none}
+.stock-pct{font-family:var(--display);font-weight:600;font-size:22px;line-height:1;color:var(--cocoa);font-variant-numeric:tabular-nums}
+.stock-pct small{font-family:var(--body);font-size:13px;font-weight:700;color:var(--soft);margin-left:4px}
+.bar{height:8px;border-radius:999px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:var(--rosa);transition:width .6s ease}
+.stock-msg{font-size:14px;font-weight:700;color:var(--cocoa);margin:0}
+.stock-msg span{font-weight:400;color:var(--soft)}
+.stock.out .dot,.stock.out .bar i{background:var(--soft)}
+.sum-urg{font-size:12.5px;font-weight:700;color:var(--rosa-ink)}
 .sum-urg:empty{display:none}
-@media (prefers-reduced-motion:no-preference){
-  .dot{animation:pulse 1.4s ease-out infinite}
-  .bar i{animation:shine 2.4s linear infinite}
-  .stock.low .stock-pct{animation:beat 1.2s ease-in-out infinite}
-}
-@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,77,109,0)}100%{box-shadow:0 0 0 0 rgba(255,77,109,0)}}
-@keyframes shine{from{background-position:200% 0}to{background-position:0 0}}
-@keyframes beat{50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -256,14 +245,13 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
   <!-- ===== DISPONIBILIDAD DEL DROP =====
        Cambia SOLO el número de data-disponible cuando entren pedidos: 100, 80, 50, 20... y 0 = agotado.
        El mensaje y la barra se ajustan solos. -->
-  <section class="stock" id="stock" data-disponible="100" aria-labelledby="stockMsg">
+  <section class="stock" id="stock" data-disponible="100" aria-label="disponibilidad del drop 01">
     <div class="stock-top">
-      <span class="live"><span class="dot" aria-hidden="true"></span>Drop 01 · en vivo</span>
+      <span class="tag"><span class="dot" aria-hidden="true"></span>Drop 01</span>
       <span class="stock-pct"><b id="stockPct">100%</b><small>disponible</small></span>
     </div>
     <div class="bar" role="progressbar" aria-label="cupos disponibles" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="stockBar" style="width:100%"></i></div>
-    <p class="stock-msg" id="stockMsg">Cupos limitados: cuando se acaben, este drop no vuelve</p>
-    <p class="stock-sub" id="stockSub">Aparta el tuyo por WhatsApp antes de que se llene.</p>
+    <p class="stock-msg" id="stockMsg">Cupos limitados. <span>Cuando se acaben, este drop no se repite.</span></p>
   </section>
 
   <div class="hero">
@@ -464,18 +452,17 @@ function mapsLink(v){
 // Disponibilidad: lee el número de data-disponible y ajusta barra, textos y urgencia.
 const DISP = Math.max(0, Math.min(100, parseInt($("stock").dataset.disponible, 10) || 0));
 (function(){
-  const t = DISP===0 ? ["¡Agotado! El drop 01 se acabó","Síguenos en Instagram o TikTok para el próximo drop."]
-          : DISP<=15 ? ["¡Últimos cupos! Esto se acaba hoy","Si lo quieres, apártalo ya. No habrá reposición."]
-          : DISP<=35 ? ["¡Se están yendo volando!","Ya casi no quedan cupos de este drop."]
-          : DISP<=70 ? ["Ya se apartaron varios cupos","Cuando se acaben, este drop no vuelve."]
-          : ["Cupos limitados: cuando se acaben, este drop no vuelve","Aparta el tuyo por WhatsApp antes de que se llene."];
-  $("stockPct").textContent = DISP===0 ? "0%" : DISP+"%";
-  $("stockBar").style.width = Math.max(DISP,3)+"%";
+  const t = DISP===0 ? ["Drop 01 agotado.","Síguenos para enterarte del próximo."]
+          : DISP<=15 ? ["Últimos cupos.","Si los quieres, este es el momento."]
+          : DISP<=35 ? ["Quedan pocos cupos.","Cuando se acaben, este drop no se repite."]
+          : DISP<=70 ? ["Ya se apartaron varios cupos.","Cuando se acaben, este drop no se repite."]
+          : ["Cupos limitados.","Cuando se acaben, este drop no se repite."];
+  $("stockPct").textContent = DISP+"%";
+  $("stockBar").style.width = Math.max(DISP,2)+"%";
   document.querySelector("#stock .bar").setAttribute("aria-valuenow", DISP);
-  $("stockMsg").textContent = t[0]; $("stockSub").textContent = t[1];
-  $("stock").classList.toggle("low", DISP>0 && DISP<=35);
+  const m=$("stockMsg"); m.textContent=t[0]+" "; const sp=document.createElement("span"); sp.textContent=t[1]; m.appendChild(sp);
   $("stock").classList.toggle("out", DISP===0);
-  $("sumUrg").textContent = DISP===0 ? "Drop agotado" : (DISP<=35 ? "🔥 Quedan "+DISP+"% de cupos" : "🔥 Drop limitado · "+DISP+"% disponible");
+  $("sumUrg").textContent = DISP===0 ? "Drop agotado" : (DISP<=35 ? "Quedan "+DISP+"% de cupos" : "");
 })();
 function lock(id,on){$(id).classList.toggle("locked",!on);}
 function render(){
