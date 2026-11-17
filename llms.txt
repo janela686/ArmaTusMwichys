@@ -1,6 +1,6 @@
 # mwichys
 
-> mwichys es una tienda online de accesorios peluditos inspirados en el estilo Y2K, nacida en el norte de Quito (sector Andalucía), Ecuador. Los pedidos se apartan por WhatsApp desde https://mwichys.com/ y se envían a todo Ecuador por Tramaco o Servientrega.
+> mwichys es una tienda online de accesorios peluditos inspirados en el estilo Y2K, nacida en el norte de Quito, Ecuador. Los pedidos se apartan por WhatsApp desde https://mwichys.com/ y se envían a todo Ecuador o se retiran en Quito.
 
 ## Productos y precios (USD)
 
@@ -13,6 +13,7 @@
 - Quito: $3.
 - Resto del país: $5,50.
 - Kit completo: envío gratis a todo Ecuador.
+- Retiro en Quito: coordinar por WhatsApp.
 
 ## Cómo comprar
 

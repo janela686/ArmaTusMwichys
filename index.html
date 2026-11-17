@@ -157,6 +157,9 @@ p{margin:0;color:var(--soft)}
 .facts{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700}
 .facts > span{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .facts svg{width:18px;height:18px;flex:none}
+.wa-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;color:#F1E2D2;text-decoration:underline;text-decoration-color:#EC9AB0;text-underline-offset:4px;min-height:32px}
+.wa-link:hover{color:#EC9AB0}
+.wa-link:focus-visible{outline:3px solid #EC9AB0;outline-offset:2px;border-radius:6px}
 .social{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .social span{border:1.5px solid rgba(241,226,210,.5);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800}
 .copyr{font-size:12px!important;opacity:.75;border-top:1px solid rgba(241,226,210,.2);padding-top:12px;width:100%;max-width:none!important}
@@ -339,9 +342,9 @@ input,select{font:inherit;font-size:16px;padding:11px 14px;border-radius:14px;bo
     <h2 id="h7" style="color:#F1E2D2;font-size:22px">Quiénes somos</h2>
     <p class="about">Somos mwichys, una tienda online de accesorios peluditos nacida en el norte de Quito. Nos inspiramos en el estilo Y2K para crear piezas frescas y únicas que combinan con tu look.</p>
     <div class="facts">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Norte de Quito, sector Andalucía · Ecuador</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Envíos a todo el país por Tramaco o Servientrega</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10h-13zM8 9V7a4 4 0 0 1 8 0v2"/></svg><span>Tienda online · pedidos por WhatsApp <a href="https://wa.me/593982605158" target="_blank" rel="noopener" style="color:#EC9AB0;white-space:nowrap">098 260 5158</a></span></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Norte de Quito</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Envíos a todo el país o retiro en Quito</span>
+      <a class="wa-link" id="waFoot" href="https://wa.me/593982605158?text=%C2%A1Hola%20mwichys!%20Tengo%20una%20pregunta" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="#EC9AB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10h-13zM8 9V7a4 4 0 0 1 8 0v2"/></svg>Tienda online · pedidos por WhatsApp</a>
     </div>
     <div class="follow">
       <span class="follow-t">Síguenos para no perderte ningún drop</span>
@@ -380,7 +383,8 @@ function track(name, params){ if (window.gtag) gtag("event", name, Object.assign
 const WA = "593982605158"; // WhatsApp de mwichys: 098 260 5158
 const st = {mw:null, pol:null, pc:null, mu:null};
 let tried=false;
-const ORDER = "MW01-" + Date.now().toString(36).slice(-4).toUpperCase() + Math.floor(Math.random()*36).toString(36).toUpperCase();
+// Número de pedido aleatorio y distinto para cada persona (6 caracteres, sin 0/O ni 1/I para que no se confundan).
+const ORDER = "MW01-" + (()=>{const A="23456789ABCDEFGHJKLMNPQRSTUVWXYZ",r=new Uint8Array(6);crypto.getRandomValues(r);return Array.from(r,x=>A[x%32]).join("");})();
 const $ = id => document.getElementById(id);
 
 document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click",()=>{
@@ -516,6 +520,7 @@ $("cta").addEventListener("click",e=>{
   if(window.__ready && window.__faltan.length){const f=$(window.__faltan[0]); f.scrollIntoView({behavior:"smooth",block:"center"}); f.focus({preventScroll:true});}
   else { const l=document.querySelector(".step:not(.locked) ~ .step.locked")||$("s1"); const prev=l.previousElementSibling; (prev&&prev.classList.contains("step")?prev:$("s1")).scrollIntoView({behavior:"smooth",block:"center"}); }
 });
+$("waFoot").addEventListener("click",()=>track("whatsapp_pie_click",{}));
 document.querySelector(".stock-cta").addEventListener("click",()=>track("aparta_click",{}));
 $("copy").addEventListener("click",()=>{
   const t=$("msg").textContent;
