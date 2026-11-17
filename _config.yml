@@ -1,0 +1,4 @@
+# GitHub Pages: no publicar los archivos internos del agente.
+exclude:
+  - CLAUDE.md
+  - _agente

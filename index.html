@@ -394,11 +394,14 @@ body.agotado{padding-bottom:32px}
 /* ==========================================================
    CONFIGURACIÓN DEL DROP · lo único que cambias en cada drop
    ========================================================== */
+// Lo actualiza el Agente Web (_agente/drop.py). Si lo editas a mano, respeta el formato.
 const DROP = {
   numero: 1,             // número del drop: 1, 2, 3...
   abre: "[fecha]",       // ej. "1 de diciembre"
   entrega: "[fecha]",    // ej. "15 de diciembre"
-  disponible: 100        // % de cupos que quedan: 100, 70, 30... 0 = AGOTADO
+  cupos: 25,             // cupos totales del drop
+  vendidos: 0,           // pedidos confirmados (el % disponible se calcula solo)
+  agotado: false         // true = muestra la versión "agotado"
 };
 /* ========================================================== */
 
@@ -480,17 +483,20 @@ function mapsLink(v){
   return "";
 }
 // Aplica la configuración del drop: número, fechas, disponibilidad y modo agotado.
-const DISP = Math.max(0, Math.min(100, parseInt(DROP.disponible, 10) || 0));
+const CUPOS = Math.max(1, parseInt(DROP.cupos,10)||1), VEND = Math.max(0, Math.min(CUPOS, parseInt(DROP.vendidos,10)||0));
+const AGOTADO = DROP.agotado===true;
+const DISP = AGOTADO ? 0 : Math.round((CUPOS-VEND)/CUPOS*100);
 (function(){
   document.querySelectorAll(".dropN").forEach(e=>e.textContent=NN);
   $("dropNext").textContent = NEXT;
   $("fAbre").textContent = DROP.abre; $("fEntrega").textContent = DROP.entrega;
   const m=$("stockMsg"); m.textContent="";
-  if(DISP===0){ m.textContent="Drop "+NN+" agotado"; }
+  if(AGOTADO){ m.textContent="Drop "+NN+" agotado"; }
+  else if(DISP===0){ m.textContent="Cupos llenos por ahora"; document.querySelector(".stock-cta").hidden=true; }
   else { m.append("Cupos limitados · "); const bb=document.createElement("b"); bb.textContent=DISP+"%"; m.append(bb," disponible"); }
   $("stock").classList.toggle("out", DISP===0);
   $("sumUrg").textContent = DISP<=35 && DISP>0 ? "Quedan "+DISP+"% de cupos" : "";
-  if(DISP===0){
+  if(AGOTADO){
     const aviso = "https://wa.me/"+WA+"?text="+encodeURIComponent("¡Hola mwichys! Quiero que me avisen cuando salga el drop "+NEXT);
     $("avisame").href = aviso;
     const c=document.querySelector(".stock-cta"); c.href="#soldout"; c.firstChild.textContent="Avísame del próximo ";
@@ -552,7 +558,7 @@ function render(){
   window.__pedido={name, color:st.mw, prov, total};
   $("need").textContent = !tried ? "" : (!ready ? "Primero arma tu kit" : (faltan.length ? (faltan.length===1&&mapsMal ? "Pega un link válido de Google Maps" : "Todos los campos deben ser rellenados") : ""));
   const cta=$("cta");
-  if(DISP===0){cta.setAttribute("aria-disabled","true");cta.href="#";$("need").textContent="Drop agotado";return;}
+  if(DISP===0){cta.setAttribute("aria-disabled","true");cta.href="#";$("need").textContent=AGOTADO?"Drop agotado":"Cupos llenos por ahora";return;}
   if(ready && !faltan.length){cta.removeAttribute("aria-disabled");cta.href=`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;}
   else{cta.setAttribute("aria-disabled","true");cta.href="#";}
 }
