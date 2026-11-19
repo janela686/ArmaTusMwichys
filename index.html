@@ -67,7 +67,7 @@
     },
     {
       "@type": "Product",
-      "name": "Kit completo mwichys",
+      "name": "Signature mwichys",
       "description": "Psyco mwichys, medias polainas y muñequeras peluditas de 9 cm a juego, con estrellitas de regalo y envío gratis a todo Ecuador.",
       "image": "https://mwichys.com/img/kit-completo.jpg",
       "brand": {"@type": "Brand", "name": "mwichys"},
@@ -244,8 +244,8 @@ body.agotado{padding-bottom:32px}
     <div class="brand-sub">Peluditas, frescas y muy tuyas</div>
     <div class="brand-sub" style="margin-top:4px"><b style="color:#EC9AB0">Inspiradas en el estilo Y2K</b></div>
     <div class="drop">
-      <span class="chip">Drop <span class="dropN">01</span> · abre <b id="fAbre">[fecha]</b></span>
-      <span class="chip">Entrega <b id="fEntrega">[fecha]</b></span>
+      <span class="chip">drop <span class="dropN">01</span></span>
+      <span class="chip">hechas a mano para ti!</span>
     </div>
     <!-- La disponibilidad se cambia en la CONFIGURACIÓN DEL DROP, al inicio del <script> de abajo. -->
     <div class="stock" id="stock">
@@ -314,7 +314,7 @@ body.agotado{padding-bottom:32px}
 
   <section class="step locked" id="s3" aria-labelledby="h3">
     <div class="free"><svg viewBox="0 0 24 24" fill="none" stroke="#2B1C16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Con envío gratis a todo Ecuador</div>
-    <div class="step-head"><span class="tag">Paso 3 · el kit completo</span><span class="price">+$6</span></div>
+    <div class="step-head"><span class="tag">Paso 3 · Signature</span><span class="price">+$6</span></div>
     <h2 id="h3">¿Completas con muñequeras?</h2>
     <img class="photo" src="img/kit-completo.jpg" alt="kit completo puesto: muñequeras, psyco mwichys con estrellitas y medias polainas" width="825" height="1024" loading="lazy">
     <p>Muñequeras peluditas de 9 cm a juego con tus mwichys, con elástico para que no se resbalen.</p>
@@ -328,7 +328,7 @@ body.agotado{padding-bottom:32px}
     </div>
     <div class="perks"><span class="perk">Ahorras armándolo completo</span></div>
     <div class="yn" role="group" aria-label="agregar muñequeras">
-      <button class="si" data-g="mu" data-v="si" aria-pressed="false">Sí, kit completo</button>
+      <button class="si" data-g="mu" data-v="si" aria-pressed="false">Sí, quiero Signature</button>
       <button class="no" data-g="mu" data-v="no" aria-pressed="false">Así está bien</button>
     </div>
   </section>
@@ -489,7 +489,7 @@ const DISP = AGOTADO ? 0 : Math.round((CUPOS-VEND)/CUPOS*100);
 (function(){
   document.querySelectorAll(".dropN").forEach(e=>e.textContent=NN);
   $("dropNext").textContent = NEXT;
-  $("fAbre").textContent = DROP.abre; $("fEntrega").textContent = DROP.entrega;
+  // Sin fechas públicas (política de drops): DROP.abre y DROP.entrega son solo internas.
   const m=$("stockMsg"); m.textContent="";
   if(AGOTADO){ m.textContent="Drop "+NN+" agotado"; }
   else if(DISP===0){ m.textContent="Cupos llenos por ahora"; document.querySelector(".stock-cta").hidden=true; }
@@ -518,8 +518,8 @@ function render(){
   const kit = st.pol==="si" && st.mu==="si";
   const pol = st.pol==="si" && st.pc;
   let name="Psyco mwichys", price=23;
-  if(pol){name="Psyco mwichys + polainas"; price=26;}
-  if(kit){name="Kit completo"; price=32;}
+  if(pol){name="Kit con polainas"; price=26;}
+  if(kit){name="Signature"; price=32;}
 
   const prov=$("prov").value, cant=$("canton").value;
   const ciudad = cant==="Quito" ? "Quito" : (cant ? "otra" : "");
